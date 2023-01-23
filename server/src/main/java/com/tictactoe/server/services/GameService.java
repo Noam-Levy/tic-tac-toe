@@ -7,13 +7,13 @@ import com.tictactoe.server.model.GameTurn;
 import com.tictactoe.server.model.TicToe;
 import com.tictactoe.server.storage.GameStorage;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import com.tictactoe.server.model.Game;
 import com.tictactoe.server.model.Player;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static com.tictactoe.server.model.GameStatus.*;
 
@@ -24,7 +24,7 @@ public class GameService {
 
     public Game initializeGame(Player player) {
         Game game = new Game();
-        game.setGameId(UUID.randomUUID().toString());
+        game.setGameId(RandomStringUtils.randomAlphanumeric(6));
         game.setBoard(new int[BOARD_SIZE][BOARD_SIZE]);
         game.setTurnsPlayed(0);
         addNewPlayerToGame(game, player);
@@ -114,9 +114,13 @@ public class GameService {
         // bad player
         if (player == null || player.getSign() == null)
             throw new InvalidInputException("Missing player or player sign");
+        // bad player sign
+        if (turn.getPlayer().equals(game.getP1()) && player.getSign().equals(TicToe.O) ||
+            turn.getPlayer().equals(game.getP2()) && player.getSign().equals(TicToe.X))
+            throw new InvalidInputException("Invalid sign for player");
         // wrong player sent turn request
         if (game.getTurnsPlayed() % 2 == 0 && turn.getPlayer().equals(game.getP2()) ||
-                game.getTurnsPlayed() % 2 != 0 && turn.getPlayer().equals(game.getP1()))
+            game.getTurnsPlayed() % 2 != 0 && turn.getPlayer().equals(game.getP1()))
             throw new InvalidInputException("Wrong player to play turn");
     }
 
