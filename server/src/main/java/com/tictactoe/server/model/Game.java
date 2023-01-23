@@ -10,4 +10,5 @@ public class Game {
     private Player p2;
     private Player winner;
     private int[][] board;
+    private int turnsPlayed;
 }
