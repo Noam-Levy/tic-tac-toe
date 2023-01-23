@@ -35,4 +35,8 @@ public class GameStorage {
     public void saveGame(Game game) {
         games.put(game.getGameId(), game);
     }
+
+    public void deleteAllGames() { // method is only used for test purposes
+        games = new HashMap<>();
+    }
 }

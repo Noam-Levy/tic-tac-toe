@@ -105,8 +105,8 @@ public class GameService {
         if (coordinates == null || !coordinates.containsKey("x") || !coordinates.containsKey("y"))
             throw new InvalidInputException("Missing coordinates");
         Integer xCoordinate = coordinates.get("x"), yCoordinate = coordinates.get("y");
-        if (xCoordinate == null || (xCoordinate < 0 || xCoordinate > 3) ||
-            yCoordinate == null || (yCoordinate < 0 || yCoordinate > 3))
+        if (xCoordinate == null || (xCoordinate < 0 || xCoordinate >= BOARD_SIZE) ||
+            yCoordinate == null || (yCoordinate < 0 || yCoordinate >= BOARD_SIZE))
             throw new InvalidInputException("Missing coordinates or out of bounds");
         if (game.getBoard()[xCoordinate][yCoordinate] != 0)
             throw new InvalidInputException("Selected cell has already been taken");
@@ -114,12 +114,16 @@ public class GameService {
         // bad player
         if (player == null || player.getSign() == null)
             throw new InvalidInputException("Missing player or player sign");
+        // wrong player sent turn request
+        if (game.getTurnsPlayed() % 2 == 0 && turn.getPlayer().equals(game.getP2()) ||
+                game.getTurnsPlayed() % 2 != 0 && turn.getPlayer().equals(game.getP1()))
+            throw new InvalidInputException("Wrong player to play turn");
     }
 
     public boolean isGameWon(int[][] board) {
         return  isHorizontalWinner(board) ||
                 isVerticalWinner(board) ||
-                isMainDiagonalWinner(board) ||
+                isPrimaryDiagonalWinner(board) ||
                 isSecondaryDiagonalWinner(board);
     }
 
@@ -131,7 +135,7 @@ public class GameService {
                 if (board[r][c] == sign) count++;
                 else sign = board[r][c]; // sign == 0
             }
-            if (count == 3) return true;
+            if (count == BOARD_SIZE - 1) return true;
         }
         return false;
     }
@@ -144,12 +148,12 @@ public class GameService {
                 if (board[r][c] == sign) count++;
                 else sign = board[r][c]; // sign == 0
             }
-            if (count == 3) return true;
+            if (count == BOARD_SIZE - 1) return true;
         }
         return false;
     }
 
-    private boolean isMainDiagonalWinner(int[][] board) {
+    private boolean isPrimaryDiagonalWinner(int[][] board) {
         int sign = 0, count = 0;
         for (int i = 0; i < BOARD_SIZE; i++) {
             if (board[i][i] == 0) return false;
@@ -162,9 +166,9 @@ public class GameService {
     private boolean isSecondaryDiagonalWinner(int[][] board) {
         int sign = 0, count = 0;
         for (int i = 0; i < BOARD_SIZE; i++) {
-            if (board[i][BOARD_SIZE - i] == 0) return false;
-            if (board[i][BOARD_SIZE - i] == sign) count++;
-            else sign = board[i][BOARD_SIZE - i]; // sign is 0
+            if (board[i][BOARD_SIZE - i - 1] == 0) return false;
+            if (board[i][BOARD_SIZE - i - 1] == sign) count++;
+            else sign = board[i][BOARD_SIZE - i - 1]; // sign is 0
         }
         return count == BOARD_SIZE - 1;
     }
