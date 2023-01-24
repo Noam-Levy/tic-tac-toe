@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = `http://localhost:8080/tictactoe`;
+export const API_BASE_URL = `http://localhost:8080`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,22 +9,28 @@ const api = axios.create({
 });
 
 export const createNewGame = async (player) => (
-  api.post('/init', player)
+  api.post('/tictactoe/init', player)
     .then((result) => result.data)
     .catch((err) => { throw new Error(err.response.data.message) })
 );
 
 export const joinGame = async (data) => {
   const {name, gameId} = data;
-
-  return api.post(`/connect`, name, { params: { gameId }})
+  return api.post(`/tictactoe/connect`, name, { params: { gameId }})
     .then((result) => result.data)
     .catch((err) => { throw new Error(err.response.data.message) })
 };
 
 
 export const doTurn = async (turn) => {
-  return api.post('/doTurn', turn)
+  return api.post('/tictactoe/doTurn', turn)
     .then((result) => result.data)
     .catch((err) => { throw new Error(err.response.data.message) })
+};
+
+export const rematch = async (data) => {
+  const { player, gameId } = data;
+  return api.post('/tictactoe/rematch', player, { params: { gameId }})
+    .then((result) => result.data)
+    .catch((err) => { throw new Error(err.response.data.message) });
 };

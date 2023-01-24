@@ -11,7 +11,8 @@ const errorTypeTexts = { required: 'This field is required' };
 const StyledTextField = styled(TextField)({
   '& .MuiOutlinedInput-root': {
     backgroundColor: 'white',
-    maxWidth: 450,
+    maxWidth: '80%',
+    minWidth: '240px',
     '& .Mui-focused': {
       borderColor: 'black'
     },
@@ -19,7 +20,7 @@ const StyledTextField = styled(TextField)({
 });
 
 function ControlledTextField(props) {
-  const { control, name, label, type, errors, rules, defaultValue } = props;
+  const { control, name, label, type, errors, rules, defaultValue, placeholder, autoFocus } = props;
   
 
   return (
@@ -39,11 +40,12 @@ function ControlledTextField(props) {
               margin="normal"
               error={!!errors[name]}
               helperText={errorTypeTexts[errors[name]?.type]}
+              placeholder={placeholder}
+              autoFocus={autoFocus}
             />
           </FormControl>
         )
       }
-
     />
   )
 }
@@ -56,6 +58,8 @@ ControlledTextField.propTypes = {
   errors: PropTypes.shape({}),
   rules: PropTypes.shape({}),
   defaultValue: PropTypes.string,
+  placeholder: PropTypes.string,
+  autoFocus: PropTypes.bool,
 };
 
 ControlledTextField.defaultProps = {
@@ -66,6 +70,8 @@ ControlledTextField.defaultProps = {
   errors: {},
   rules: {},
   defaultValue: '',
+  placeholder: '',
+  autoFocus: false,
 };
 
 export default ControlledTextField
