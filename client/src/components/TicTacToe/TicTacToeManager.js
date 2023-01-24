@@ -87,11 +87,12 @@ function TicTacToeManager({ player, gameData, setGameData, handleError }) {
   return (
     <Container>
       <Container>
-        <span>{`Currently playing: ${gameData.turnsPlayed % 2 === 0 ? gameData.p1.name : gameData.p2.name}`}</span>
+        <span>{`Now Playing: ${gameData.turnsPlayed % 2 === 0 ? gameData.p1.name : gameData.p2.name}`}</span>
         <span>{`Game ID: ${gameData?.gameId}`}</span>
         <span>{`Player name: ${player.name}, Sign: ${player.sign}`}</span>
       </Container>
       {renderGameBoard()}
+      {gameData?.status  === "WAITING" && <span>{gameData?.winner?.name ? `WINNER: ${gameData?.winner?.name}` : "Draw"}</span>}
       { gameData?.status  === "WAITING" && showRematch && <Rematch onAccept={onRematchAccept} onReject={onRematchReject} /> }
     </Container>
   )
