@@ -63,7 +63,7 @@ public class GameService {
         int xCoordinate = turn.getCoordinates().get("x"), yCoordinate = turn.getCoordinates().get("y");
 
         board[xCoordinate][yCoordinate] = player.getSign().getValue();
-        game.setTurnsPlayed(turnsPlayed + 1);
+        game.setTurnsPlayed(++turnsPlayed);
         if (isGameWon(board)) {
             game.setWinner(player);
             game.setStatus(FINISHED);
@@ -99,7 +99,7 @@ public class GameService {
 
         // game is not in progress
         if (!game.getStatus().equals(IN_PROGRESS))
-            throw new InvalidGameException("Cannot complete turn. Game {%s} is not in progress".formatted(turn.getGameId()));
+            throw new InvalidGameException("Cannot complete turn. Game is not in progress");
 
         // bad coordinates
         if (coordinates == null || !coordinates.containsKey("x") || !coordinates.containsKey("y"))
