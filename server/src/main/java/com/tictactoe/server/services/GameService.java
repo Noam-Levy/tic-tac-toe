@@ -47,7 +47,7 @@ public class GameService {
                 .stream()
                 .filter(it -> it.getP2() == null && it.getStatus().equals(NEW)) // filter out unavailable games to join into
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Sorry! there are no available games in the moment"));
+                .orElseThrow(() -> new NotFoundException("Sorry! there are no available games at the moment"));
 
         addNewPlayerToGame(game, anotherPlayer);
         GameStorage.getInstance().saveGame(game);
