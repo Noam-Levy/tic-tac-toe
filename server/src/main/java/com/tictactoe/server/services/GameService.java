@@ -54,7 +54,32 @@ public class GameService {
         return game;
     }
 
-    public Game doTurn(GameTurn turn) {
+    public Game acceptRematch(String gameId, Player player) {
+        Game game = GameStorage.getInstance().getGames().get(gameId);
+        if (game == null) // no game with passed gameId
+            throw new NotFoundException("Unknown game id: " + gameId);
+        Player otherPlayer = player.getName().equals(game.getP1().getName()) ? game.getP2() : game.getP1();
+        if (otherPlayer.isAcceptRematch()) // both players accepted the rematch
+            return resetGame(game);
+        if (player.getName().equals(game.getP1().getName())) // not both answered - update player choice
+            game.setP1(player);
+        else
+            game.setP2(player);
+
+        GameStorage.getInstance().saveGame(game);
+        return game;
+    }
+
+    public Game declineRematch(String gameId) {
+        Game game = GameStorage.getInstance().getGames().get(gameId);
+        if (game == null) // no game with passed gameId
+            throw new NotFoundException("Unknown game id: " + gameId);
+        game.setStatus(FINISHED);
+        GameStorage.getInstance().saveGame(game);
+        return game;
+    }
+
+     public Game doTurn(GameTurn turn) {
         validateTurn(turn);
         Game game = GameStorage.getInstance().getGames().get(turn.getGameId());
         int[][] board = game.getBoard();
@@ -66,11 +91,28 @@ public class GameService {
         game.setTurnsPlayed(++turnsPlayed);
         if (isGameWon(board)) {
             game.setWinner(player);
-            game.setStatus(FINISHED);
+            game.setStatus(WAITING);
         }
 
         if (turnsPlayed == BOARD_SIZE * BOARD_SIZE)
-            game.setStatus(FINISHED); // game concluded. might be with a draw (winner = null)
+            game.setStatus(WAITING); // game concluded. might be with a draw (winner = null)
+        return game;
+    }
+
+    private Game resetGame(Game game) {
+        game.setBoard(new int[BOARD_SIZE][BOARD_SIZE]);
+        game.setTurnsPlayed(0);
+        game.setStatus(IN_PROGRESS);
+        game.setWinner(null);
+        Player p1 = game.getP1(), p2 = game.getP2();
+        p1.setSign(TicToe.O);
+        p1.setAcceptRematch(false);
+        p2.setSign(TicToe.X);
+        p2.setAcceptRematch(false);
+        // switch positions for even starting (P1 always begins)
+        game.setP1(p2);
+        game.setP2(p1);
+        GameStorage.getInstance().saveGame(game);
         return game;
     }
 
@@ -135,8 +177,7 @@ public class GameService {
         for (int r = 0; r < BOARD_SIZE; r++) {
             int sign = 0, count = 0;
             for (int c = 0; c < BOARD_SIZE; c++) {
-                if (board[r][c] == 0) return false;
-                if (board[r][c] == sign) count++;
+                if (board[r][c] == sign && sign != 0) count++;
                 else sign = board[r][c]; // sign == 0
             }
             if (count == BOARD_SIZE - 1) return true;
@@ -148,8 +189,7 @@ public class GameService {
         for (int c = 0; c < BOARD_SIZE; c++) {
             int sign = 0, count = 0;
             for (int r = 0; r < BOARD_SIZE; r++) {
-                if (board[r][c] == 0) return false;
-                if (board[r][c] == sign) count++;
+                if (board[r][c] == sign && sign != 0) count++;
                 else sign = board[r][c]; // sign == 0
             }
             if (count == BOARD_SIZE - 1) return true;

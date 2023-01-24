@@ -12,4 +12,5 @@ public class Player {
     @NonNull
     private String name;
     private TicToe sign;
+    private boolean acceptRematch;
 }

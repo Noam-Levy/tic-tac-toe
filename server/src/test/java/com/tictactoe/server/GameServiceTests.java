@@ -129,7 +129,7 @@ public class GameServiceTests {
     @Test
     public void isWinnerHorizontal() {
         int[][] board = {
-                {1,2,2},
+                {0,2,2},
                 {1,1,1},
                 {2,2,0}
         };
@@ -139,9 +139,9 @@ public class GameServiceTests {
     @Test
     public void isWinnerVertical() {
         int[][] board = {
-                {1,2,2},
-                {1,2,0},
-                {1,2,0}
+                {0,2,2},
+                {0,1,2},
+                {0,1,2}
         };
         assertThat(this.service.isGameWon(board)).isTrue();
     }
@@ -159,7 +159,7 @@ public class GameServiceTests {
     @Test
     public void isWinnerSecondaryDiagonal() {
         int[][] board = {
-                {1,2,2},
+                {0,2,2},
                 {1,2,0},
                 {2,2,1}
         };

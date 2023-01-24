@@ -42,4 +42,17 @@ public class TicTacToeController {
         this.messagingTemplate.convertAndSend("/topic/progress/" + game.getGameId(), game);
         return ResponseEntity.ok(game);
     }
+
+    @PostMapping("/rematch")
+    public ResponseEntity<Game> rematch(@RequestBody Player player,
+                                        @RequestParam(name="gameId", defaultValue="") String gameId) {
+        Game game;
+        if (player.isAcceptRematch())
+            game = this.service.acceptRematch(gameId, player);
+        else
+            game = this.service.declineRematch(gameId);
+
+        this.messagingTemplate.convertAndSend("/topic/progress/" + game.getGameId(), game);
+        return ResponseEntity.ok(game);
+    }
 }
