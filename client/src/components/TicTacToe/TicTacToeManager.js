@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { Stomp } from '@stomp/stompjs'
 import SockJS from 'sockjs-client';
 
-
 import { API_BASE_URL, doTurn, rematch } from '../../gameApi';
 import Board from './Board';
 import Rematch from './Rematch';
@@ -31,11 +30,11 @@ function TicTacToeManager({ player, gameData, setGameData, handleError }) {
       handleError('One of the players has declined the rematch.');
     }
     else if (gameData.status === "IN_PROGRESS") {
-      initializeGameSocket(gameData.gameId);
+      initializeConnection(`${API_BASE_URL}/doTurn`, `/topic/progress/${gameData.gameId}`, (response) => { setGameData(JSON.parse(response.body)) });
       setShowRematch(true);
     }
     else if (gameData.status !== "WAITING")
-      initializeConnectSocket(gameData.gameId);   
+      initializeConnection(`${API_BASE_URL}/connect`, `/topic/connection/${gameData.gameId}`, (response) => { setGameData(JSON.parse(response.body)) });
   }, [gameData]); //eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCellSelection = (cell) => {
@@ -45,24 +44,14 @@ function TicTacToeManager({ player, gameData, setGameData, handleError }) {
       .catch((err) => handleError(err.message));
   };
 
-
-  const initializeGameSocket = (gameId) => {
-    socket = new SockJS(`${API_BASE_URL}/doTurn`);
+  const initializeConnection = (socketURL, subscriptionURL, subscriptionCallback) => {
+    socket = new SockJS(socketURL);
     stompClient = Stomp.over(socket);
     stompClient.debug = () => {}; // disable debug logging
     stompClient.connect({}, () => {
-      stompClient.subscribe(`/topic/progress/${gameId}`, (response) => { setGameData(JSON.parse(response.body)); });
+      stompClient.subscribe(subscriptionURL, (response) => { subscriptionCallback(response); });
     });
-  };
-
-  const initializeConnectSocket = (gameId) => {
-    socket = new SockJS(`${API_BASE_URL}/connect`);
-    stompClient = Stomp.over(socket);
-    stompClient.debug = () => {}; // disable debug logging
-    stompClient.connect({}, () => {
-      stompClient.subscribe(`/topic/connection/${gameId}`, (response) => { setGameData(JSON.parse(response.body)); });
-    });
-  };
+  }
 
   const renderGameBoard = () => {
     if (gameData?.status  !== "NEW")
@@ -70,19 +59,12 @@ function TicTacToeManager({ player, gameData, setGameData, handleError }) {
     return <Loader text={`Waiting for opponent to join game. (ID: ${gameData?.gameId}) `} /> 
   };
 
-  const onRematchAccept = () => {
+  const onRematchDecision = (decision) => {
     setShowRematch(false);
-    player.acceptRematch = true;
+    player.acceptRematch = decision;
     rematch({player, gameId: gameData.gameId})
       .catch((err) => handleError(err.message));
-  }
-
-  const onRematchReject = () => {
-    setShowRematch(false);
-    player.acceptRematch = false;
-    rematch({player, gameId: gameData.gameId})
-      .catch((err) => handleError(err.message));
-  }
+  };
 
   return (
     <Container>
@@ -91,11 +73,11 @@ function TicTacToeManager({ player, gameData, setGameData, handleError }) {
         <span>{`Game ID: ${gameData?.gameId}`}</span>
         <span>{`Player name: ${player.name}, Sign: ${player.sign}`}</span>
       </Container>
-      {renderGameBoard()}
-      {gameData?.status  === "WAITING" && <span>{gameData?.winner?.name ? `WINNER: ${gameData?.winner?.name}` : "Draw"}</span>}
-      { gameData?.status  === "WAITING" && showRematch && <Rematch onAccept={onRematchAccept} onReject={onRematchReject} /> }
+      { renderGameBoard() }
+      { gameData?.status  === "WAITING" && <span>{gameData?.winner?.name ? `WINNER: ${gameData?.winner?.name}` : "Draw"}</span> }
+      { gameData?.status  === "WAITING" && showRematch && <Rematch onAccept={() => onRematchDecision(true)} onReject={() => onRematchDecision(false)} /> }
     </Container>
-  )
+  );
 };
 
 TicTacToeManager.propTypes = {

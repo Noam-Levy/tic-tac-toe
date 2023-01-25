@@ -22,13 +22,13 @@ function App() {
     const { player, ...gameData } = data;
     setPlayer(gameData.gameData[player]);
     setGame(gameData.gameData);
-  }
+  };
 
   const handleError = (errorMessage) => {
     setAlertMessage(errorMessage);
     setIsShowAlert(true);
     setTimeout(() => setIsShowAlert(false), 5000); // auto close alert window after 5 seconds
-  }
+  };
 
   return (
     <Container>
@@ -45,7 +45,7 @@ function App() {
         message={alertMessage}
       />
     </Container>
-  )
+  );
 }
 
 export default App;

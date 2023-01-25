@@ -27,7 +27,7 @@ function Rematch({text, onAccept, onReject}) {
             <Button variant='contained' color='error' onClick={() => onReject()}>NO</Button>
           </HorizontalContainer>
         </Container>
-  )
+  );
 };
 
 Rematch.propTypes = {
